@@ -1,0 +1,205 @@
+openapi: 3.0.2
+info:
+  title: Contacts
+  version: 1.0.0
+  contact:
+    name: Mike Mitchell
+    email: mdm7xj@virginia.edu
+servers:
+  - url: http://localhost:8080/v1
+    description: Local testing instance
+paths:
+  /contacts:
+    get:
+      summary: get a list of all contacts from the database
+      operationId: getAllContacts
+      responses:
+        200:
+          description: A list of Contact objects. The list may be empty if there are no records to return, but the request was otherwise correct.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactList'
+    post:
+      summary: create a new contact
+      operationId: createContact
+      requestBody:
+        description: new contact to add to the database
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contact'
+      responses:
+        200:
+          description: Success, contact was successfully created
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {
+                  $ref: '#/components/schemas/Contact'
+                }
+        400:
+          description: There was an error in the formatting and/or values passed in the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+  /contacts/{id}:
+    get:
+      summary: get an individual Contact
+      operationId: getContact
+      parameters:
+        - name: id
+          description: the unique id of the desired contact
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        200:
+          description: Returns a single contact's information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        400:
+          description: There was an error in the formatting and/or values passed in the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        404:
+          description: >
+            Resource not found.  If the contact id does not exist, but the request
+            is otherwise correct, the message will contain the text, "Contact not found".
+            Errors from other causes will provide the server's default message text.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+    put:
+      summary: update members of an individual contact
+      operationId: updateContact
+      parameters:
+        - name: id
+          description: the unique id of the desired contact
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        200:
+          description: Returns a single contact's information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        400:
+          description: There was an error in the formatting and/or values passed in the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        404:
+          description: >
+            Resource not found.  If the contact's id does not exist, but the request
+            is otherwise correct, the message will contain the text, "Contact not found".
+            Errors from other causes will provide the server's default 404 message text.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+    delete:
+      summary: delete an individual Contact
+      operationId: deleteContact
+      parameters:
+        - name: id
+          description: the unique id of the desired contact to delete
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        200:
+          description: Contact was successfully deleted
+        400:
+          description: There was an error in the formatting and/or values passed in the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        404:
+          description: >
+            Resource not found.  If the contact id does not exist, but the request
+            is otherwise correct, the message will contain the text, "Contact not found".
+            Errors from other causes will provide the server's default message text.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+components:
+  schemas:
+    Contact:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        Name:
+          type: object
+          properties:
+            first:
+              type: string
+            middle:
+              type: string
+            last:
+              type: string
+        Address:
+          type: object
+          properties:
+            street:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            zip:
+              type: string
+        Phone:
+          type: array
+          items:
+            $ref: "#/components/schemas/PhoneObject"
+        PhoneObject:
+          type: object
+          properties:
+            number:
+              type: string
+            city:
+              type: string
+              enum: ['home', 'work', 'mobile']
+        email:
+          type: string
+    ContactList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Contact"
+    ErrorInfo:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          minimum: 100
+          maximum: 599
+        message:
+          type: string
+        uri:
+          type: string
+        params:
+          type: object
+          additionalProperties: # this is a map/dictionary/hash for the key->value parameters
+            type: string
